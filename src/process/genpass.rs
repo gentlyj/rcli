@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use crate::opts::GenpassOpts;
+use crate::cli::GenpassOpts;
 use rand::seq::SliceRandom;
 use zxcvbn::zxcvbn;
 
