@@ -1,29 +1,9 @@
 use anyhow::anyhow;
 use clap::Parser;
 use core::fmt;
-use std::{path::Path, str::FromStr};
+use std::str::FromStr;
 
-#[derive(Debug, Parser)]
-#[command(name = "rcli", version, about = "Rust CLI tools", author)]
-pub struct Opts {
-    #[command(subcommand)]
-    pub cmd: SubCommand,
-}
-
-#[derive(Debug, Parser)]
-pub enum SubCommand {
-    #[command(name = "csv", about = "Convert csv to json")]
-    Csv(CsvOpts),
-    #[command(name = "genpass", about = "generate password")]
-    Genpass(GenpassOpts),
-}
-#[derive(Debug, Clone, Copy)]
-pub enum OutputFormat {
-    Json,
-    Yaml,
-    Toml,
-}
-
+use super::verify_input_file;
 #[derive(Debug, Parser)]
 pub struct CsvOpts {
     #[arg(short, long, value_parser = verify_input_file)]
@@ -37,28 +17,13 @@ pub struct CsvOpts {
     #[arg(short, long, default_value_t = ',')]
     pub delimiter: char,
 }
-#[derive(Debug, Parser)]
-pub struct GenpassOpts {
-    #[arg(long, default_value_t = 16)]
-    pub length: u8,
-    #[arg(long, default_value_t = true)]
-    pub uppercase: bool,
-    #[arg(long, default_value_t = true)]
-    pub lowercase: bool,
-    #[arg(long, default_value_t = true)]
-    pub number: bool,
-    #[arg(long, default_value_t = true)]
-    pub symbol: bool,
-}
 
-fn verify_input_file(filename: &str) -> Result<String, anyhow::Error> {
-    if Path::new(filename).exists() {
-        Ok(filename.into())
-    } else {
-        Err(anyhow!("File not exist: {}", filename))
-    }
+#[derive(Debug, Clone, Copy)]
+pub enum OutputFormat {
+    Json,
+    Yaml,
+    Toml,
 }
-
 fn output_format_parser(value: &str) -> Result<OutputFormat, anyhow::Error> {
     match value {
         "json" => Ok(OutputFormat::Json),
@@ -67,7 +32,6 @@ fn output_format_parser(value: &str) -> Result<OutputFormat, anyhow::Error> {
         _ => Err(anyhow!("Invalid output format: {}", value)),
     }
 }
-
 impl From<OutputFormat> for &'static str {
     fn from(format: OutputFormat) -> Self {
         match format {
