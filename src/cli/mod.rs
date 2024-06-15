@@ -1,14 +1,13 @@
 mod base64;
 mod csv;
 mod genpass;
-use anyhow::anyhow;
 use clap::Parser;
 use std::path::Path;
 
 pub use csv::{CsvOpts, OutputFormat};
 pub use genpass::GenpassOpts;
 
-use self::base64::Base64SubCommand;
+pub use self::base64::{Base64Format, Base64SubCommand};
 
 #[derive(Debug, Parser)]
 #[command(name = "rcli", version, about = "Rust CLI tools", author)]
@@ -27,10 +26,22 @@ pub enum SubCommand {
     Base64(Base64SubCommand),
 }
 
-fn verify_input_file(filename: &str) -> Result<String, anyhow::Error> {
-    if Path::new(filename).exists() {
+fn verify_input_file(filename: &str) -> Result<String, &'static str> {
+    if Path::new(filename).exists() || filename == "-" {
         Ok(filename.into())
     } else {
-        Err(anyhow!("File not exist: {}", filename))
+        Err("File dose not exist")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_verify_input_file() {
+        assert_eq!(verify_input_file("-"), Ok("-".into()));
+        assert_eq!(verify_input_file("Cargo.toml"), Ok("Cargo.toml".into()));
+        assert_eq!(verify_input_file("not-exist"), Err("File dose not exist"));
     }
 }
