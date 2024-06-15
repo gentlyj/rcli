@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt, str::FromStr};
 
 use anyhow::anyhow;
 use clap::Parser;
@@ -57,5 +57,11 @@ impl From<Base64Format> for &'static str {
             Base64Format::Standard => "Standard",
             Base64Format::UrlSafe => "UrlSafe",
         }
+    }
+}
+
+impl fmt::Display for Base64Format {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", Into::<&str>::into(*self))
     }
 }
